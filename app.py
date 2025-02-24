@@ -100,6 +100,48 @@ def remove_component(product_id, component_id):
     
     return '', 204
 
+@app.route('/api/products/<int:product_id>/component_tree', methods=['GET'])
+def get_component_tree(product_id):
+    """Get the full component tree for a product."""
+    product = Product.query.get_or_404(product_id)
+    
+    def build_tree(product, quantity=1, unit=None):
+        tree = product.to_dict()
+        tree['quantity'] = quantity
+        tree['unit'] = unit
+        
+        # Get direct components
+        components = []
+        for component in product.components:
+            component_tree = build_tree(
+                component.component,
+                component.quantity,
+                component.unit
+            )
+            components.append(component_tree)
+        
+        tree['components'] = components
+        return tree
+    
+    return jsonify(build_tree(product))
+
+@app.route('/api/products/<int:product_id>/used_in', methods=['GET'])
+def get_used_in(product_id):
+    """Get all products that use this product as a component."""
+    product = Product.query.get_or_404(product_id)
+    used_in = []
+    
+    for usage in product.used_in:
+        used_in.append({
+            'id': usage.parent_product.id,
+            'name': usage.parent_product.name,
+            'quantity': float(usage.quantity),
+            'unit': usage.unit,
+            'idiot_index': float(usage.parent_product.idiot_index) if usage.parent_product.idiot_index else None
+        })
+    
+    return jsonify(used_in)
+
 def _would_create_cycle(parent_id, component_id):
     """Check if adding component_id as a component of parent_id would create a cycle."""
     if parent_id == component_id:
@@ -126,6 +168,11 @@ def _would_create_cycle(parent_id, component_id):
 def index():
     """Render the main page."""
     return render_template('index.html')
+
+@app.route('/products/new')
+def new_product():
+    """Render the new product page."""
+    return render_template('new_product.html')
 
 @app.route('/products/<int:product_id>')
 def product_detail(product_id):

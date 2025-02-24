@@ -9,62 +9,25 @@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-8">Idiot Index Calculator</h1>
-        
-        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Add New Product</h2>
-            <form id="productForm" class="space-y-4">
-                <div>
-                    <label class="block text-gray-700">Product Name</label>
-                    <input type="text" id="productName" required
-                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                           placeholder="Product name">
-                </div>
-                <div>
-                    <label class="block text-gray-700">Description</label>
-                    <textarea id="productDescription"
-                              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                              placeholder="Product description"></textarea>
-                </div>
-                <div>
-                    <label class="block text-gray-700">Retail Price ($)</label>
-                    <input type="number" id="retailPrice" required step="0.01" min="0"
-                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                           placeholder="0.00">
-                </div>
-                <div>
-                    <label class="block text-gray-700">Source URL</label>
-                    <input type="url" id="sourceUrl"
-                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                           placeholder="https://www.example.com/product">
-                </div>
-                <button type="submit"
-                        class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                    Add Product
-                </button>
-            </form>
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold">Idiot Index Calculator</h1>
+            <a href="/products/new" 
+               class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                + New Product
+            </a>
         </div>
 
         <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">Products</h2>
-                <div class="flex space-x-4">
-                    <button id="viewToggle" class="text-blue-500 hover:text-blue-700">
-                        Toggle View
-                    </button>
-                    <select id="sortBy" class="border rounded-lg px-2 py-1">
-                        <option value="idiot_index">Sort by Idiot Index</option>
-                        <option value="name">Sort by Name</option>
-                        <option value="retail_price">Sort by Price</option>
-                    </select>
-                </div>
+                <select id="sortBy" class="border rounded-lg px-2 py-1">
+                    <option value="idiot_index">Sort by Idiot Index</option>
+                    <option value="name">Sort by Name</option>
+                    <option value="retail_price">Sort by Price</option>
+                </select>
             </div>
             
-            <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Products will be inserted here by JavaScript -->
-            </div>
-            
-            <div id="productsList" class="hidden">
+            <div class="overflow-x-auto">
                 <table class="min-w-full table-auto">
                     <thead>
                         <tr class="bg-gray-50">

@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} - Idiot Index Calculator</title>
+    <title>{{ product.name }} - Idiot Index</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
@@ -14,113 +13,208 @@
         </nav>
 
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
-            {% if product.description %}
-            <p class="text-gray-600 mb-4">{{ product.description }}</p>
-            {% endif %}
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
+                    <p class="text-gray-600 mb-4">{{ product.description }}</p>
+                </div>
+                {% if product.source_url %}
+                <a href="{{ product.source_url }}" target="_blank" 
+                   class="text-blue-500 hover:text-blue-700">View Source</a>
+                {% endif %}
+            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-gray-700">Retail Price</h3>
+                    <h3 class="text-lg font-semibold mb-2">Retail Price</h3>
                     <p class="text-2xl">${{ "%.2f"|format(product.retail_price) }}</p>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-gray-700">Materials Cost</h3>
+                    <h3 class="text-lg font-semibold mb-2">Materials Cost</h3>
                     <p class="text-2xl">${{ "%.2f"|format(product.materials_cost) }}</p>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-semibold text-gray-700">Idiot Index</h3>
-                    <p class="text-2xl {{ 'idiot-index-high' if product.idiot_index >= 5 else 'idiot-index-medium' if product.idiot_index >= 2 else 'idiot-index-low' }}">
-                        {{ "%.1f"|format(product.idiot_index) }}x
-                    </p>
+                    <h3 class="text-lg font-semibold mb-2">Idiot Index</h3>
+                    <p class="text-2xl">{{ "%.2f"|format(product.idiot_index) }}x</p>
                 </div>
             </div>
 
-            {% if product.is_raw_material %}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 class="font-semibold text-blue-800">Raw Material</h3>
-                <p class="text-blue-600">This is a raw material with a base cost of ${{ "%.2f"|format(product.raw_material_cost) }}</p>
-            </div>
-            {% else %}
-            <div class="mb-6">
+            <div class="mb-8">
                 <h2 class="text-2xl font-semibold mb-4">Components</h2>
-                {% if product.components.count() > 0 %}
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-4 py-2 text-left">Component</th>
-                                <th class="px-4 py-2 text-left">Quantity</th>
-                                <th class="px-4 py-2 text-left">Unit Cost</th>
-                                <th class="px-4 py-2 text-left">Total Cost</th>
-                                <th class="px-4 py-2 text-left">Idiot Index</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for component in product.components %}
-                            <tr class="border-t">
-                                <td class="px-4 py-2">
-                                    <a href="{{ url_for('product_detail', product_id=component.component.id) }}"
-                                       class="text-blue-500 hover:text-blue-700">
-                                        {{ component.component.name }}
-                                    </a>
-                                </td>
-                                <td class="px-4 py-2">{{ "%.2f"|format(component.quantity) }} {{ component.unit }}</td>
-                                <td class="px-4 py-2">${{ "%.2f"|format(component.component.materials_cost) }}</td>
-                                <td class="px-4 py-2">${{ "%.2f"|format(component.component.materials_cost * component.quantity) }}</td>
-                                <td class="px-4 py-2 {{ 'idiot-index-high' if component.component.idiot_index >= 5 else 'idiot-index-medium' if component.component.idiot_index >= 2 else 'idiot-index-low' }}">
-                                    {{ "%.1f"|format(component.component.idiot_index) }}x
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                {% if product.components.count() == 0 %}
+                    <p class="text-gray-600">This is a raw material (no components).</p>
                 {% else %}
-                <p class="text-gray-600">No components added yet.</p>
+                    <div class="space-y-4" id="componentTree">
+                        <!-- Component tree will be rendered here by JavaScript -->
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold mb-4">Add Component</h3>
+                        <form id="addComponentForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Component</label>
+                                    <select id="componentSelect" required
+                                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Quantity</label>
+                                    <input type="number" id="quantity" required min="0" step="0.01"
+                                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Unit</label>
+                                    <input type="text" id="unit" required
+                                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                                           placeholder="pieces, kg, meters, etc">
+                                </div>
+                            </div>
+                            <button type="submit"
+                                    class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                                Add Component
+                            </button>
+                        </form>
+                    </div>
                 {% endif %}
             </div>
-            {% endif %}
 
-            {% if product.used_in.count() > 0 %}
-            <div class="mb-6">
+            <div>
                 <h2 class="text-2xl font-semibold mb-4">Used In</h2>
-                <div class="space-y-2">
-                    {% for usage in product.used_in %}
-                    <div class="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
-                        <div>
-                            <a href="{{ url_for('product_detail', product_id=usage.parent_product.id) }}"
-                               class="text-blue-500 hover:text-blue-700 font-semibold">
-                                {{ usage.parent_product.name }}
-                            </a>
-                            <p class="text-gray-600">
-                                Quantity: {{ "%.2f"|format(usage.quantity) }} {{ usage.unit }}
-                            </p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold">Idiot Index</p>
-                            <p class="{{ 'idiot-index-high' if usage.parent_product.idiot_index >= 5 else 'idiot-index-medium' if usage.parent_product.idiot_index >= 2 else 'idiot-index-low' }}">
-                                {{ "%.1f"|format(usage.parent_product.idiot_index) }}x
-                            </p>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div id="usedInList">
+                    <!-- Products using this component will be rendered here by JavaScript -->
                 </div>
             </div>
-            {% endif %}
-
-            {% if product.source_url %}
-            <div class="mt-8 pt-6 border-t">
-                <h3 class="font-semibold text-gray-700">Source</h3>
-                <a href="{{ product.source_url }}" target="_blank" rel="noopener noreferrer" 
-                   class="text-blue-500 hover:text-blue-700">
-                    {{ product.source_url }}
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
 
-    <script src="/static/js/main.js"></script>
+    <script>
+        const productId = {{ product.id }};
+        
+        // Fetch and render the full component tree
+        async function fetchComponentTree() {
+            try {
+                const response = await fetch(`/api/products/${productId}/component_tree`);
+                const tree = await response.json();
+                document.getElementById('componentTree').innerHTML = renderComponentTree(tree);
+            } catch (error) {
+                console.error('Error fetching component tree:', error);
+            }
+        }
+
+        // Fetch and render the "used in" list
+        async function fetchUsedIn() {
+            try {
+                const response = await fetch(`/api/products/${productId}/used_in`);
+                const products = await response.json();
+                document.getElementById('usedInList').innerHTML = products.length ? 
+                    products.map(p => `
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <a href="/products/${p.id}" class="text-blue-500 hover:text-blue-700 font-medium">
+                                ${p.name}
+                            </a>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Quantity: ${p.quantity} ${p.unit}
+                            </p>
+                        </div>
+                    `).join('') :
+                    '<p class="text-gray-600">This product is not used as a component in any other products.</p>';
+            } catch (error) {
+                console.error('Error fetching used in list:', error);
+            }
+        }
+
+        // Render a component and its subcomponents recursively
+        function renderComponentTree(node) {
+            const components = node.components || [];
+            return `
+                <div class="border-l-2 border-gray-200 pl-4 ml-2">
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-2">
+                        <div>
+                            <a href="/products/${node.id}" class="text-blue-500 hover:text-blue-700 font-medium">
+                                ${node.name}
+                            </a>
+                            <p class="text-sm text-gray-600">
+                                Quantity: ${node.quantity || 1} ${node.unit || 'piece(s)'}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">Cost: $${(node.materials_cost * (node.quantity || 1)).toFixed(2)}</p>
+                            ${node.components?.length ? 
+                                `<button onclick="toggleComponent(${node.id})" class="text-blue-500 hover:text-blue-700 text-sm">
+                                    Toggle Components
+                                </button>` : 
+                                '<span class="text-sm text-gray-500">Raw Material</span>'
+                            }
+                        </div>
+                    </div>
+                    ${components.length ? `
+                        <div id="components-${node.id}" class="ml-4">
+                            ${components.map(c => renderComponentTree(c)).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Toggle visibility of a component's subcomponents
+        function toggleComponent(id) {
+            const el = document.getElementById(`components-${id}`);
+            if (el) {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // Load available components for the add component form
+        async function loadAvailableComponents() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+                const select = document.getElementById('componentSelect');
+                select.innerHTML = products
+                    .filter(p => p.id !== productId) // Don't include self
+                    .map(p => `<option value="${p.id}">${p.name}</option>`)
+                    .join('');
+            } catch (error) {
+                console.error('Error loading available components:', error);
+            }
+        }
+
+        // Handle adding a new component
+        document.getElementById('addComponentForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                component_id: parseInt(document.getElementById('componentSelect').value),
+                quantity: parseFloat(document.getElementById('quantity').value),
+                unit: document.getElementById('unit').value
+            };
+
+            try {
+                const response = await fetch(`/api/products/${productId}/components`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add component');
+                }
+
+                // Refresh the component tree
+                fetchComponentTree();
+                e.target.reset();
+            } catch (error) {
+                console.error('Error adding component:', error);
+                alert('Failed to add component: ' + error.message);
+            }
+        });
+
+        // Initialize
+        fetchComponentTree();
+        fetchUsedIn();
+        loadAvailableComponents();
+    </script>
 </body>
 </html>
