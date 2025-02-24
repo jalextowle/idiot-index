@@ -12,44 +12,81 @@
         <h1 class="text-4xl font-bold text-center mb-8">Idiot Index Calculator</h1>
         
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Calculate Index</h2>
-            <form id="calculateForm" class="space-y-4">
+            <h2 class="text-2xl font-semibold mb-4">Add New Product</h2>
+            <form id="productForm" class="space-y-4">
                 <div>
-                    <label class="block text-gray-700">Product URL</label>
-                    <input type="url" id="productUrl" required
+                    <label class="block text-gray-700">Product Name</label>
+                    <input type="text" id="productName" required
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                           placeholder="Product name">
+                </div>
+                <div>
+                    <label class="block text-gray-700">Description</label>
+                    <textarea id="productDescription"
+                              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                              placeholder="Product description"></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-700">Retail Price ($)</label>
+                    <input type="number" id="retailPrice" required step="0.01" min="0"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                           placeholder="0.00">
+                </div>
+                <div>
+                    <label class="block text-gray-700">Source URL</label>
+                    <input type="url" id="sourceUrl"
                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
                            placeholder="https://www.example.com/product">
                 </div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="isRawMaterial" class="rounded text-blue-500">
+                    <label for="isRawMaterial" class="text-gray-700">This is a raw material</label>
+                </div>
+                <div id="rawMaterialCostDiv" class="hidden">
+                    <label class="block text-gray-700">Raw Material Cost ($)</label>
+                    <input type="number" id="rawMaterialCost" step="0.01" min="0"
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                           placeholder="0.00">
+                </div>
                 <button type="submit"
                         class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                    Calculate Index
+                    Add Product
                 </button>
             </form>
         </div>
 
-        <div id="result" class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8 hidden">
-            <h2 class="text-2xl font-semibold mb-4">Results</h2>
-            <div class="space-y-2">
-                <p><strong>Product Name:</strong> <span id="productName"></span></p>
-                <p><strong>Retail Price:</strong> $<span id="retailPrice"></span></p>
-                <p><strong>Materials Cost:</strong> $<span id="materialsCost"></span></p>
-                <p><strong>Idiot Index:</strong> <span id="idiotIndex"></span></p>
+        <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">Products</h2>
+                <div class="flex space-x-4">
+                    <button id="viewToggle" class="text-blue-500 hover:text-blue-700">
+                        Toggle View
+                    </button>
+                    <select id="sortBy" class="border rounded-lg px-2 py-1">
+                        <option value="idiot_index">Sort by Idiot Index</option>
+                        <option value="name">Sort by Name</option>
+                        <option value="retail_price">Sort by Price</option>
+                    </select>
+                </div>
             </div>
-        </div>
-
-        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold mb-4">Recent Calculations</h2>
-            <div class="overflow-x-auto">
+            
+            <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Products will be inserted here by JavaScript -->
+            </div>
+            
+            <div id="productsList" class="hidden">
                 <table class="min-w-full table-auto">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-4 py-2">Product</th>
-                            <th class="px-4 py-2">Retail Price</th>
-                            <th class="px-4 py-2">Materials Cost</th>
-                            <th class="px-4 py-2">Idiot Index</th>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-2 text-left">Product</th>
+                            <th class="px-4 py-2 text-left">Retail Price</th>
+                            <th class="px-4 py-2 text-left">Materials Cost</th>
+                            <th class="px-4 py-2 text-left">Idiot Index</th>
+                            <th class="px-4 py-2 text-left">Type</th>
                         </tr>
                     </thead>
-                    <tbody id="productsList">
+                    <tbody id="productsTableBody">
+                        <!-- Products will be inserted here by JavaScript -->
                     </tbody>
                 </table>
             </div>
