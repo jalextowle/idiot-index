@@ -1,0 +1,38 @@
+/* Custom styles on top of Tailwind CSS */
+.idiot-index-high {
+    color: #ef4444;
+}
+
+.idiot-index-medium {
+    color: #f59e0b;
+}
+
+.idiot-index-low {
+    color: #10b981;
+}
+
+/* Loading animation */
+.loading {
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 0;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid #ddd;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: loading-spinner 1s ease-in-out infinite;
+}
+
+@keyframes loading-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
